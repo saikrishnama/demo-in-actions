@@ -4,6 +4,7 @@ name: CI
 env:
   # Setting an environment variable with the value of a configuration variable
   env_var: ${{ vars.ENV_CONTEXT_VAR }}
+  appname: ${{ vars.APPLICATIONNAME }}
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
@@ -28,6 +29,6 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
         run: |
-          echo Getting Variable from Application ${{ vars.APPLICATIONNAME }} and Environment is ${{ env.env_var }} and my Secrets is ${{ secrets.MYDBPASS }}
+          echo Getting Variable from Application ${{ env.appname }} and Environment is ${{ env.env_var }} and my Secrets is ${{ secrets.MYDBPASS }}
           ls -ltr 
           echo test, and deploy your project.
