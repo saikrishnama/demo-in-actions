@@ -11,7 +11,7 @@ on:
         required: true
 jobs:
   demorun:
-    runs-on: ${{ inputs.runner_id }}
+    runs-on: '${{ github.event.inputs.runner_id }}'
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
