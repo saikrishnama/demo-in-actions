@@ -5,21 +5,24 @@ on:
 #   push:
 #     branches: [main]
   workflow_dispatch:
-    inputs:
-      runner_id:
-        description:  please pass the runner which platform that you want to use
-        required: true
-        type: choice
-        options:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
-          - ubuntu-20.04
-          - windows-2019
+    # inputs:
+    #   runner_id:
+    #     description:  please pass the runner which platform that you want to use
+    #     required: true
+    #     type: choice
+    #     options:
+    #       - ubuntu-latest
+    #       - windows-latest
+    #       - macos-latest
+    #       - ubuntu-20.04
+    #       - windows-2019
 
 jobs:
   demorun:
-    runs-on: '${{ github.event.inputs.runner_id }}'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest, ubuntu-20.04, windows-2019]
+    runs-on: ${{ matrix.os }}
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
@@ -40,7 +43,6 @@ jobs:
         if: ${{ github.event.inputs.runner_id == 'windows-2019' || github.event.inputs.runner_id == 'windows-latest' }}
         run: |
           dir
-      # Runs a set of commands using the runners shell
       # Runs a set of commands using the runners shell
       - name: Run only On Linux Machines
         if: ${{ github.event.inputs.runner_id != 'windows-2019' && github.event.inputs.runner_id != 'windows-latest' }}
