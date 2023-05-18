@@ -2,13 +2,21 @@
 
 name: CI
 on:
-  push:
-    branches: [main]
+#   push:
+#     branches: [main]
   workflow_dispatch:
     inputs:
       runner_id:
         description:  please pass the runner which platform that you want to use
         required: true
+        type: choice
+        options:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+          - ubuntu-20.04
+          - windows-2019
+
 jobs:
   demorun:
     runs-on: '${{ github.event.inputs.runner_id }}'
