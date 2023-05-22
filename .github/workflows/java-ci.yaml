@@ -19,13 +19,6 @@ jobs:
           java-version: '8'
           
       -  run: |
-           java -version
+            pwd && ls -ltr 
+            mvn clean install 
       
-      - name: Setup MAven  version or check MAven Version
-        uses: actions/setup-java@v3
-        with:
-          distribution: "temurin"
-          java-version: '8'
-          
-      - run: |
-           mvn -version
