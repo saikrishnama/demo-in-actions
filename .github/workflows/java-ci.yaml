@@ -1,0 +1,31 @@
+name: JAVA CI Pipeline
+on:
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:    
+      - main
+      - 'feature/*'
+jobs:
+  MavenBuild:
+     runs-on: ubuntu-latest
+     steps:
+      - name: Code Checkout
+        uses: actions/checkout@v3
+        
+      - name: Setup Java version or check Java Version
+        uses: actions/setup-java@v3
+        with:
+          distribution: "Oracle JDK"
+          java-version: '8'
+          
+      -  run: |
+           java -version
+      
+      - name: Setup MAven  version or check MAven Version
+        uses: actions/setup-java@v3
+        with:
+          distribution: "Oracle JDK"
+          java-version: '8'
+          
+      - run: |
+           mvn -version
