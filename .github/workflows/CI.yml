@@ -60,6 +60,7 @@ jobs:
           echo "variable2" $VARIABLE2     
           echo "job_levelvariable_read_job2" $FIRST_NAME    
           
+          
 #         with:
 #           ref: demo-2
 #       - run: |
