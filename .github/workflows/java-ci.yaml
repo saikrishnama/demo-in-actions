@@ -12,13 +12,29 @@ jobs:
       - name: Code Checkout
         uses: actions/checkout@v3
         
-      - name: Setup Java version or check Java Version
+      - name: Code Build
         uses: actions/setup-java@v3
         with:
           distribution: "temurin"
           java-version: '8'
-          
       -  run: |
             pwd && ls -ltr 
             mvn clean install 
-      
+            
+      - name: Code Test
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: '8'
+      -  run: |
+            pwd && ls -ltr 
+            mvn test
+            
+#       - name: Code Quality/Analysis
+#         uses: actions/setup-java@v3
+#         with:
+#           distribution: "temurin"
+#           java-version: '8'
+#       -  run: |
+#             pwd && ls -ltr 
+#             mvn test
