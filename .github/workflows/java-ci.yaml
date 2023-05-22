@@ -15,7 +15,7 @@ jobs:
       - name: Setup Java version or check Java Version
         uses: actions/setup-java@v3
         with:
-          distribution: "Oracle JDK"
+          distribution: "temurin"
           java-version: '8'
           
       -  run: |
