@@ -24,7 +24,7 @@ jobs:
       - name: Setup MAven  version or check MAven Version
         uses: actions/setup-java@v3
         with:
-          distribution: "Oracle JDK"
+          distribution: "temurin"
           java-version: '8'
           
       - run: |
