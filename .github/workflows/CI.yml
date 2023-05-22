@@ -40,7 +40,11 @@ jobs:
           echo "variable1" $MyVariable1
           echo "variable2" $VARIABLE2
           echo "job_levelvariable_read" $FIRST_NAME
+
+
   ParalleJobtodemorun:
+    env:
+      FIRST_NAME: Mona
     strategy:
       matrix:
 #         os: [ubuntu-latest, windows-latest, macos-latest, ubuntu-20.04, windows-2019]
