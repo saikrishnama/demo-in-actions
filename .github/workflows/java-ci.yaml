@@ -60,7 +60,7 @@ jobs:
           username: nexus
           password: ${{ secrets.NEXUS_PASSWORD }} 
           format: maven2
-          repository: maven-snapshots
+          repository: maven-release
           coordinates: groupId=helloworld artifactId=helloworld version=1.0-SNAPSHOT
           assets: extension=war
           filename: /target/helloworld.war
