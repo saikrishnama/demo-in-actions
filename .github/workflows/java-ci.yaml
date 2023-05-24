@@ -63,4 +63,4 @@ jobs:
           repository: maven-snapshots
           coordinates: groupId=helloworld artifactId=helloworld version=1.0-SNAPSHOT
           assets: extension=war
-          filename: /target/helloworld-1.0-SNAPSHOT.war
+          filename: /target/helloworld.war
