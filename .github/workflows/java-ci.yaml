@@ -3,7 +3,7 @@ on:
   push:
     # Sequence of patterns matched against refs/heads
     branches:    
-      - main
+      - dev
       - 'feature/*'
 jobs:
   MavenBuild:
