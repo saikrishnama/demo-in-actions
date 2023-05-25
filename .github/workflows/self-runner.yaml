@@ -7,4 +7,4 @@ jobs:
   test:
     runs-on: self-hosted
     steps:
-    - run: echo Hello world!
+    - run: echo Hello world! 
