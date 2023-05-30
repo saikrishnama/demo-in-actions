@@ -13,3 +13,7 @@ jobs:
         with:
           name: homework
           path: math-homework.txt
+      - name: Download math result for job 2
+        uses: actions/download-artifact@v3
+        with:
+          name: homework
