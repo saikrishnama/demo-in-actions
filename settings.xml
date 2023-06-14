@@ -1,37 +1,27 @@
-<settings>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
+
+  <servers>
+    <server>
+      <id>Snapshot</id>
+      <username>admin</username>
+      <password>30f03b7c-e3dc-3c56-a2f9-779859ef15cf</password>
+    </server>
+    <server>
+      <id>Releases</id>
+      <username>admin</username>
+      <password>30f03b7c-e3dc-3c56-a2f9-779859ef15cf</password>
+    </server>
+  </servers>
+
   <mirrors>
     <mirror>
-      <!--This sends everything else to /public -->
-      <id>nexus</id>
+      <id>central</id>
+      <name>central</name>
+      <url>http://localhost:8081/repository/maven-public/</url>
       <mirrorOf>*</mirrorOf>
-      <url>http://3.83.202.76:8081/repository/maven-public/</url>
     </mirror>
   </mirrors>
-  <profiles>
-    <profile>
-      <id>nexus</id>
-      <!--Enable snapshots for the built in central repo to direct -->
-      <!--all requests to nexus via the mirror -->
-      <repositories>
-        <repository>
-          <id>central</id>
-          <url>http://central</url>
-          <releases><enabled>true</enabled></releases>
-          <snapshots><enabled>true</enabled></snapshots>
-        </repository>
-      </repositories>
-     <pluginRepositories>
-        <pluginRepository>
-          <id>central</id>
-          <url>http://central</url>
-          <releases><enabled>true</enabled></releases>
-          <snapshots><enabled>true</enabled></snapshots>
-        </pluginRepository>
-      </pluginRepositories>
-    </profile>
-  </profiles>
-  <activeProfiles>
-    <!--make the profile active all the time -->
-    <activeProfile>nexus</activeProfile>
-  </activeProfiles>
+
 </settings>
