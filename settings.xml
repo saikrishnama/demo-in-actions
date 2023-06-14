@@ -4,12 +4,12 @@
 
   <servers>
     <server>
-      <id>Snapshot</id>
+      <id>nexus</id>
       <username>admin</username>
       <password>30f03b7c-e3dc-3c56-a2f9-779859ef15cf</password>
     </server>
     <server>
-      <id>Releases</id>
+      <id>nexus</id>
       <username>admin</username>
       <password>30f03b7c-e3dc-3c56-a2f9-779859ef15cf</password>
     </server>
