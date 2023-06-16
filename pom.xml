@@ -89,8 +89,10 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
-  <scm>
-    <developerConnection>scm:git:https://github.com/saikrishnama/demo-in-actions </developerConnection>
-  </scm>	
+<scm>
+   <connection>scm:git:https://github.com/saikrishnama/demo-in-actions.git</connection>
+   <url>https://github.com/saikrishnama/demo-in-actions</url>
+   <developerConnection>scm:git:https://github.com/saikrishnama/demo-in-actions.git</developerConnection>
+</scm>	
 </project>
 
