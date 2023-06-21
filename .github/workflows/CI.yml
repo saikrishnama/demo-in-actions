@@ -1,84 +1,84 @@
-# This is a basic workflow to help you get started with Actions
+# # This is a basic workflow to help you get started with Actions
 
-name: CI
-env:
-  MyVariable1: "WelcometoEnvVariableValue1"
-  VARIABLE2: "MyVAR2"
-on:
-#   schedule:
-#     - cron: '30 5 * * 1,3'
-#     - cron: '30 5 * * 1,4'
+# name: CI
+# env:
+#   MyVariable1: "WelcometoEnvVariableValue1"
+#   VARIABLE2: "MyVAR2"
+# on:
+# #   schedule:
+# #     - cron: '30 5 * * 1,3'
+# #     - cron: '30 5 * * 1,4'
 
-  workflow_dispatch:
-    # inputs:
-    #   runner_id:
-    #     description:  please pass the runner which platform that you want to use
-    #     required: true
-    #     type: choice
-    #     options:
-    #       - ubuntu-latest
-    #       - windows-latest
-    #       - macos-latest
-    #       - ubuntu-20.04
-    #       - windows-2019
+#   workflow_dispatch:
+#     # inputs:
+#     #   runner_id:
+#     #     description:  please pass the runner which platform that you want to use
+#     #     required: true
+#     #     type: choice
+#     #     options:
+#     #       - ubuntu-latest
+#     #       - windows-latest
+#     #       - macos-latest
+#     #       - ubuntu-20.04
+#     #       - windows-2019
 
-jobs:
-  demorun:
-    env:
-      FIRST_NAME: Mona
-    strategy:
-      matrix:
-#         os: [ubuntu-latest, windows-latest, macos-latest, ubuntu-20.04, windows-2019]
-          os: [ubuntu-latest]     
-    runs-on: ${{ matrix.os }}
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-      - name: checking variable from GLOBAL
-        run: |
-          echo "variable1" $MyVariable1
-          echo "variable2" $VARIABLE2
-          echo "job_levelvariable_read" $FIRST_NAME
+# jobs:
+#   demorun:
+#     env:
+#       FIRST_NAME: Mona
+#     strategy:
+#       matrix:
+# #         os: [ubuntu-latest, windows-latest, macos-latest, ubuntu-20.04, windows-2019]
+#           os: [ubuntu-latest]     
+#     runs-on: ${{ matrix.os }}
+#     steps:
+#       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+#       - uses: actions/checkout@v3
+#       - name: checking variable from GLOBAL
+#         run: |
+#           echo "variable1" $MyVariable1
+#           echo "variable2" $VARIABLE2
+#           echo "job_levelvariable_read" $FIRST_NAME
 
 
-  ParalleJobtodemorun:
-    env:
-      FIRST_NAME: Mona
-    strategy:
-      matrix:
-#         os: [ubuntu-latest, windows-latest, macos-latest, ubuntu-20.04, windows-2019]
-          os: [ubuntu-latest]
+#   ParalleJobtodemorun:
+#     env:
+#       FIRST_NAME: Mona
+#     strategy:
+#       matrix:
+# #         os: [ubuntu-latest, windows-latest, macos-latest, ubuntu-20.04, windows-2019]
+#           os: [ubuntu-latest]
           
-    runs-on: ${{ matrix.os }}
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-      - name: checking variable from GLOBAL
-        run: |
-          echo "variable1" $MyVariable1
-          echo "variable2" $VARIABLE2     
-          echo "job_levelvariable_read_job2" $FIRST_NAME    
+#     runs-on: ${{ matrix.os }}
+#     steps:
+#       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+#       - uses: actions/checkout@v3
+#       - name: checking variable from GLOBAL
+#         run: |
+#           echo "variable1" $MyVariable1
+#           echo "variable2" $VARIABLE2     
+#           echo "job_levelvariable_read_job2" $FIRST_NAME    
           
           
-#         with:
-#           ref: demo-2
-#       - run: |
-#            date > date.txt
-#            git config user.name github-actions-in-place
-#            git config user.email github-actions-in-place@no-reply.com
-#            git add .
-#            git commit -m "date generated" .
-#           #  git push
+# #         with:
+# #           ref: demo-2
+# #       - run: |
+# #            date > date.txt
+# #            git config user.name github-actions-in-place
+# #            git config user.email github-actions-in-place@no-reply.com
+# #            git add .
+# #            git commit -m "date generated" .
+# #           #  git push
            
       
 
-#       # Runs a set of commands using the runners shell &&
-#       - name: Run only On Windows Machines
-#         if: ${{ github.event.inputs.runner_id == 'windows-2019' || github.event.inputs.runner_id == 'windows-latest' }}
-#         run: |
-#           dir
-#       # Runs a set of commands using the runners shell
-#       - name: Run only On Linux Machines
-#         if: ${{ github.event.inputs.runner_id != 'windows-2019' && github.event.inputs.runner_id != 'windows-latest' }}
-#         run: |
-#           ls -ltr 
+# #       # Runs a set of commands using the runners shell &&
+# #       - name: Run only On Windows Machines
+# #         if: ${{ github.event.inputs.runner_id == 'windows-2019' || github.event.inputs.runner_id == 'windows-latest' }}
+# #         run: |
+# #           dir
+# #       # Runs a set of commands using the runners shell
+# #       - name: Run only On Linux Machines
+# #         if: ${{ github.event.inputs.runner_id != 'windows-2019' && github.event.inputs.runner_id != 'windows-latest' }}
+# #         run: |
+# #           ls -ltr 
