@@ -1,0 +1,50 @@
+import boto3
+import json
+
+# Create SQS client
+sqs = boto3.client('sqs')
+
+# URL of the SQS queue
+queue_url = 'YOUR_SQS_QUEUE_URL'
+
+# Poll messages from the SQS queue
+def poll_messages():
+    messages = []
+
+    while True:
+        # Receive message from SQS queue
+        response = sqs.receive_message(
+            QueueUrl=queue_url,
+            MaxNumberOfMessages=10,  # Adjust the number of messages to retrieve
+            WaitTimeSeconds=10,  # Adjust the wait time if needed
+            MessageAttributeNames=['All'],
+            AttributeNames=['All']
+        )
+
+        if 'Messages' not in response:
+            break
+
+        for message in response['Messages']:
+            # Print out the message body
+            messages.append({
+                'MessageId': message['MessageId'],
+                'ReceiptHandle': message['ReceiptHandle'],
+                'Body': message['Body'],
+                'Attributes': message.get('Attributes', {}),
+                'MessageAttributes': message.get('MessageAttributes', {}),
+                'MD5OfBody': message['MD5OfBody']
+            })
+
+            # Delete received message from queue
+            sqs.delete_message(
+                QueueUrl=queue_url,
+                ReceiptHandle=message['ReceiptHandle']
+            )
+
+    return messages
+
+# Get all messages
+all_messages = poll_messages()
+
+# Output messages in JSON format
+print(json.dumps(all_messages, indent=4))
