@@ -1,118 +1,117 @@
-import sys
+import os
 import json
-import datetime
-import requests
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
-from botocore.credentials import ReadOnlyCredentials
+from botocore.credentials import InstanceMetadataProvider, InstanceMetadataFetcher
 from types import SimpleNamespace
-import boto3
+import requests
 
 # Configuration
 protocol = 'https'
 
 # Default values
-default_host = "your-neptune-endpoint"
-default_port = 8182
+default_host = "your-neptune-endpoint.amazonaws.com:8182"
 default_method = "GET"
 default_query_type = "status"
 default_query = ""
 
-# Use EC2 instance profile for AWS credentials
-session = boto3.Session()
-credentials = session.get_credentials().get_frozen_credentials()
-region = session.region_name
+# Get credentials from the EC2 instance profile
+def get_instance_profile_credentials():
+    provider = InstanceMetadataProvider(fetcher=InstanceMetadataFetcher(timeout=1, num_attempts=2))
+    creds = provider.load()
+    if not creds:
+        raise Exception("Could not retrieve credentials from the instance profile.")
+    return SimpleNamespace(
+        access_key=creds.access_key,
+        secret_key=creds.secret_key,
+        token=creds.token,
+        region=os.getenv('AWS_REGION', 'us-east-1'),
+    )
 
-def validate_input(method, query_type):
-    if method not in ["GET", "POST"]:
-        print('Method must be "GET" or "POST", but is "' + method + '".')
-        sys.exit()
-    if method == "GET" and query_type == "sparqlupdate":
-        print('SPARQL UPDATE is not supported in GET mode. Please choose POST.')
-        sys.exit()
-
-def get_canonical_uri_and_payload(query_type, query, method):
-    if query_type == 'sparql':
-        canonical_uri = '/sparql/'
-        payload = {'query': query}
-    elif query_type == 'sparqlupdate':
-        canonical_uri = '/sparql/'
-        payload = {'update': query}
-    elif query_type == 'gremlin':
-        canonical_uri = '/gremlin/'
-        payload = {'gremlin': query}
-        if method == 'POST':
-            payload = json.dumps(payload)
-    elif query_type == 'openCypher':
-        canonical_uri = '/openCypher/'
-        payload = {'query': query}
-    elif query_type == "loader":
-        canonical_uri = "/loader/"
-        payload = query
-    elif query_type == "status":
-        canonical_uri = "/status/"
-        payload = {}
-    else:
-        print('Query type should be from ["gremlin", "sparql", "sparqlupdate", "loader", "status"] but is "' + query_type + '".')
-        sys.exit()
-    return canonical_uri, payload
-
+# Function to make signed requests
 def make_signed_request(host, method, query_type, query):
     service = 'neptune-db'
-    endpoint = f"{protocol}://{host}:{default_port}"
-    
-    print(f"\n+++++ USER INPUT +++++\nhost = {host}\nmethod = {method}\nquery_type = {query_type}\nquery = {query}")
+    endpoint = protocol + '://' + host
+
+    print()
+    print('+++++ USER INPUT +++++')
+    print(f'host = {host}')
+    print(f'method = {method}')
+    print(f'query_type = {query_type}')
+    print(f'query = {query}')
 
     # Validate input
-    validate_input(method, query_type)
+    if method not in ['GET', 'POST']:
+        raise ValueError(f"Method must be 'GET' or 'POST', but is {method}.")
 
-    # Get canonical URI and payload
+    # Canonical URI and Payload
     canonical_uri, payload = get_canonical_uri_and_payload(query_type, query, method)
 
-    # Assign payload to data or params
     data = payload if method == 'POST' else None
     params = payload if method == 'GET' else None
 
-    # Create request URL
+    # Create Request URL
     request_url = endpoint + canonical_uri
 
+    # Fetch credentials
+    creds = get_instance_profile_credentials()
+
     # Create and sign request
-    creds = SimpleNamespace(
-        access_key=credentials.access_key,
-        secret_key=credentials.secret_key,
-        token=credentials.token,
-        region=region,
-    )
     request = AWSRequest(method=method, url=request_url, data=data, params=params)
-    SigV4Auth(creds, service, region).add_auth(request)
+    SigV4Auth(creds, service, creds.region).add_auth(request)
 
-    # Send the request
+    # Send Request
+    r = None
     if method == 'GET':
-        print('++++ BEGIN GET REQUEST +++++')
-        print(f'Request URL = {request_url}')
-        response = requests.get(request_url, headers=request.headers, verify=False, params=params)
+        print(f'Request URL: {request_url}')
+        r = requests.get(request_url, headers=request.headers, verify=False, params=params)
     elif method == 'POST':
-        print('\n+++++ BEGIN POST REQUEST +++++')
-        print(f'Request URL = {request_url}')
-        response = requests.post(request_url, headers=request.headers, verify=False, data=data)
+        print(f'Request URL: {request_url}')
+        r = requests.post(request_url, headers=request.headers, verify=False, data=data)
+    
+    if r:
+        print()
+        print('+++++ RESPONSE +++++')
+        print(f'Response code: {r.status_code}')
+        response = r.text
+        r.close()
+        print(response)
+        return response
+
+# Helper to get canonical URI and payload
+def get_canonical_uri_and_payload(query_type, query, method):
+    if query_type == 'sparql':
+        return '/sparql/', {'query': query}
+    elif query_type == 'sparqlupdate':
+        return '/sparql/', {'update': query}
+    elif query_type == 'gremlin':
+        payload = {'gremlin': query}
+        return '/gremlin/', json.dumps(payload) if method == 'POST' else payload
+    elif query_type == 'openCypher':
+        return '/openCypher/', {'query': query}
+    elif query_type == "loader":
+        return "/loader/", query
+    elif query_type == "status":
+        return "/status/", {}
+    elif query_type == "gremlin/status":
+        return "/gremlin/status/", {}
+    elif query_type == "openCypher/status":
+        return "/openCypher/status/", {}
+    elif query_type == "sparql/status":
+        return "/sparql/status/", {}
     else:
-        print('Request method is neither "GET" nor "POST", something is wrong here.')
-        sys.exit()
+        raise ValueError(f'Invalid query_type: {query_type}')
 
-    print('\n+++++ RESPONSE +++++')
-    print(f'Response code: {response.status_code}\n')
-    print(response.text)
-    response.close()
-    return response.text
-
-def main():
-    # Replace these default values as needed
+# Main Execution
+if __name__ == "__main__":
+    # Defaults
     host = default_host
     method = default_method
     query_type = default_query_type
     query = default_query
 
-    make_signed_request(host, method, query_type, query)
-
-if __name__ == "__main__":
-    main()
+    # Call Neptune
+    try:
+        make_signed_request(host, method, query_type, query)
+    except Exception as e:
+        print(f"Error: {str(e)}")
