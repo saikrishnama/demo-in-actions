@@ -1,0 +1,16 @@
+# Regular expression pattern for valid user profile names
+USER_PROFILE_PATTERN='^[a-zA-Z0-9-_\.]{1,64}$'
+
+while IFS= read -r USER_PROFILE; do
+    echo "Processing user profile: $USER_PROFILE"
+    if [[ "$USER_PROFILE" =~ $USER_PROFILE_PATTERN ]]; then
+        echo "Deleting user profile: $USER_PROFILE"
+        if [ "$DRY_RUN" != "--dry-run" ]; then
+            aws_with_retries aws sagemaker delete-user-profile --domain-id "$DOMAIN_ID" --user-profile-name "$USER_PROFILE"
+        else
+            echo "Dry run: $USER_PROFILE would be deleted."
+        fi
+    else
+        echo "Skipping invalid profile: $USER_PROFILE (does not match pattern)"
+    fi
+done < "$OUTPUT_FILE"
