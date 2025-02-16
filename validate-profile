@@ -1,6 +1,48 @@
+#!/bin/bash
+
+# Check if the domain ID is provided as an argument
+if [ -z "$1" ]; then
+    echo "Usage: $0 <SageMaker-Domain-ID> [--dry-run]"
+    exit 1
+fi
+
+DOMAIN_ID=$1
+DRY_RUN=$2
+
+# Define output files
+OUTPUT_FILE="sagemaker_user_profiles.txt"
+FAILED_PROFILES_FILE="failed_user_profiles.txt"
+
 # Regular expression pattern for valid user profile names
 USER_PROFILE_PATTERN='^[a-zA-Z0-9-_\.]{1,64}$'
 
+# Function to execute AWS CLI command with retries
+aws_with_retries() {
+    local attempt=0
+    local max_retries=5
+    local delay=2
+
+    while [ $attempt -lt $max_retries ]; do
+        "$@" && return 0
+        attempt=$((attempt + 1))
+        echo "Attempt $attempt failed. Retrying in $delay seconds..."
+        sleep $delay
+        delay=$((delay * 2))
+    done
+
+    echo "Max retries reached. Command failed."
+    return 1
+}
+
+# List user profiles for the specified SageMaker domain and save to file line by line
+aws_with_retries aws sagemaker list-user-profiles --domain-id-equals "$DOMAIN_ID" --query "UserProfiles[].UserProfileName" --output text | tr '\t' '\n' > "$OUTPUT_FILE"
+
+echo "User profiles saved to $OUTPUT_FILE"
+
+# Initialize failed profiles file
+> "$FAILED_PROFILES_FILE"  # Clear the file before appending
+
+# Read the user profiles from the file and delete them if not in dry-run mode
 while IFS= read -r USER_PROFILE; do
     echo "Processing user profile: $USER_PROFILE"
     if [[ "$USER_PROFILE" =~ $USER_PROFILE_PATTERN ]]; then
@@ -11,6 +53,11 @@ while IFS= read -r USER_PROFILE; do
             echo "Dry run: $USER_PROFILE would be deleted."
         fi
     else
+        # Log invalid profiles to the file
+        echo "$USER_PROFILE" >> "$FAILED_PROFILES_FILE"
         echo "Skipping invalid profile: $USER_PROFILE (does not match pattern)"
     fi
 done < "$OUTPUT_FILE"
+
+echo "Operation completed. If dry run was enabled, no profiles were deleted."
+echo "Invalid profiles logged to $FAILED_PROFILES_FILE"
