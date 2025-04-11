@@ -21,8 +21,6 @@ fi
 
 # Initialize file counter
 FILE_NUMBER=0
-
-# Total number of files for reference
 TOTAL_FILES=$(wc -l < "$OBJECTS_FILE")
 
 echo "Starting S3 Restore Process for $TOTAL_FILES files..."
@@ -32,23 +30,35 @@ echo "----------------------------------------" | tee -a "$LOG_FILE"
 while IFS= read -r OBJECT_KEY; do
     if [[ -n "$OBJECT_KEY" ]]; then
         ((FILE_NUMBER++))  # Increment file counter
-        echo "[$FILE_NUMBER/$TOTAL_FILES] Restoring: $OBJECT_KEY" | tee -a "$LOG_FILE"
-        
-        # AWS S3 Restore Command
-        aws s3api restore-object --bucket "$BUCKET_NAME" --key "$OBJECT_KEY" \
-            --restore-request "{\"Days\": $RESTORE_DAYS, \"GlacierJobParameters\": {\"Tier\": \"$RESTORE_TIER\"}}" \
-            >> "$LOG_FILE" 2>&1
+        echo "[$FILE_NUMBER/$TOTAL_FILES] Checking: $OBJECT_KEY" | tee -a "$LOG_FILE"
 
-        # Check if the command was successful
-        if [[ $? -eq 0 ]]; then
-            echo "✔ Successfully submitted restore request for: $OBJECT_KEY" | tee -a "$LOG_FILE"
+        # Get object metadata to check restore status
+        RESTORE_STATUS=$(aws s3api head-object --bucket "$BUCKET_NAME" --key "$OBJECT_KEY" --query "Restore" --output text 2>/dev/null)
+
+        if [[ "$RESTORE_STATUS" == "None" || "$RESTORE_STATUS" == "null" ]]; then
+            echo "🔹 Not restored. Submitting restore request..." | tee -a "$LOG_FILE"
+            
+            # Submit restore request
+            aws s3api restore-object --bucket "$BUCKET_NAME" --key "$OBJECT_KEY" \
+                --restore-request "{\"Days\": $RESTORE_DAYS, \"GlacierJobParameters\": {\"Tier\": \"$RESTORE_TIER\"}}" \
+                >> "$LOG_FILE" 2>&1
+
+            if [[ $? -eq 0 ]]; then
+                echo "✔ Restore request submitted for: $OBJECT_KEY" | tee -a "$LOG_FILE"
+            else
+                echo "❌ Failed to restore: $OBJECT_KEY" | tee -a "$LOG_FILE"
+            fi
+
+        elif [[ "$RESTORE_STATUS" == *"ongoing-request=true"* ]]; then
+            echo "⏳ Already being restored. Skipping..." | tee -a "$LOG_FILE"
+
         else
-            echo "❌ Failed to restore: $OBJECT_KEY" | tee -a "$LOG_FILE"
+            echo "✅ Already restored. Skipping..." | tee -a "$LOG_FILE"
         fi
 
-        # Optional delay to avoid hitting API rate limits (uncomment if needed)
+        # Optional delay to avoid hitting API rate limits
         # sleep 1
     fi
 done < "$OBJECTS_FILE"
 
-echo "All restore requests submitted." | tee -a "$LOG_FILE"
+echo "All necessary restore requests submitted." | tee -a "$LOG_FILE"
